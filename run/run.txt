@@ -1,0 +1,12 @@
+To run on floydhub, (assuming you set up an account and downloaded cli tools, and uploaded sintel dataset), initialize a project.
+
+floyd init <project_name>
+where the project_name is artbitrary but it is how you keep track of jobs on floydhub
+
+afterward simply run
+floyd run --data <dataset path on floydhub>:<mount point> --cpu --env tensorflow-1.5 "python3 ofMain.py"
+
+Two things are import above, the --cpu can be --gpu, however, you probably want to run --cpu until you gaurentee that you are running correctly.
+Second, the <path to dataset> is the directory path on floydhub, it mounts the dataset in the VM we are running on. The <mount point> should be the same name as the path your code will use to read data. In the code currently the base bath is "/sintel" so the command should be
+
+--data <dataset path on floydhub>:sintel
