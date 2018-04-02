@@ -31,8 +31,6 @@ def _bytes_feature(value):
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
 
-  
-
   """Add code for stacking two input frames together to get 6-channel input layer.
   Assuming this will be named input_layer and fed into Conv layer #1"""
 
@@ -159,9 +157,9 @@ def cnn_model_fn(features, labels, mode):
       activation=tf.nn.relu)
 
 
-"""Begin Refinement Layer
-For the tf.layers.conv2d_transpose - still not too sure on whether filter numbers are for output or input
-but will be easy to check when running"""
+  """Begin Refinement Layer
+  For the tf.layers.conv2d_transpose - still not too sure on whether filter numbers are for output or input
+  but will be easy to check when running"""
 
   #Deconvolution Layer 1
   deconv5 = tf.layers.conv2d_transpose(
@@ -291,6 +289,28 @@ but will be easy to check when running"""
       activation=tf.nn.relu
   )
 
+
+  if mode == tf.estimator.ModeKeys.PREDICT:
+    return tf.estimator.EstimatorSpec(mode=mode, predictions=flow_prediction)
+
+  """Need to finish this section"""
+  # Calculate Loss (for both TRAIN and EVAL modes)
+  loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+
+  # Configure the Training Op (for TRAIN mode)
+  if mode == tf.estimator.ModeKeys.TRAIN:
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+    train_op = optimizer.minimize(
+        loss=loss,
+        global_step=tf.train.get_global_step())
+    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+  # Add evaluation metrics (for EVAL mode)
+  eval_metric_ops = {
+      "accuracy": tf.metrics.accuracy(
+          labels=labels, predictions=predictions["classes"])}
+  return tf.estimator.EstimatorSpec(
+      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
 
