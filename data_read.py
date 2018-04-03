@@ -19,13 +19,11 @@ def read_flo(filename):
 			train_labels = tf.convert_to_tensor(train_labels)
 	return train_labels
 
-def _parse_function(filename1,filename2,ground_truth_flow):
-  image_string1 = tf.read_file(filename1)
-  image_string2 = tf.read_file(filename2)
-  image_decoded1 = tf.image.decode_png(image_string1)
-  image_decoded2 = tf.image.decode_png(image_string2)
-  #image_resized = tf.image.resize_images(image_decoded, [28, 28])
-  return (image_decoded1,image_decoded2,ground_truth_flow)
+def parse_function(filename):
+  image_string = tf.read_file(filename)
+  image_decoded = tf.image.decode_png(image_string)
+  #image_resized2 = tf.image.resize_images(image_decoded2, [28, 28])
+  return image_decoded
 
 def get_data(filename,data_name):
 	''' filename: the path of MPI-Sintel-complete
@@ -35,9 +33,13 @@ def get_data(filename,data_name):
 	path = filename+"/training/"+data_name
 	subdir = next(os.walk(path))[1]
 
+	# read only 4 sub directories
+	subdir = [subdir[x] for x in range(0,5)]
+
 	# get the list of file names
-	# filename1: list of file names for the 1st frame in a pair
-	# filename2: list of file names for the 2nd frame in a pair
+	# filename1: list of frame1 tensor
+	# filename2: list of frame2 tensor
+	# ground_truth_flow: list of flow tensor
 	filenames1 = []
 	filenames2 = []
 	ground_truth_flow = [];
@@ -45,14 +47,14 @@ def get_data(filename,data_name):
 		number = len(next(os.walk(filename+"/training/"+data_name+"/"+sub))[2])
 		for i in range(1,number):
 			if i < 10:
-				filenames1.append(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i))
+				filenames1.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
 			else:
-				filenames1.append(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i))
+				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
 		for i in range(2,number+1):
 			if i < 10:
-				filenames2.append(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i))
+				filenames2.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
 			else:
-				filenames2.append(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i))				
+				filenames2.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))				
 		for i in range(1,number):
 			if i < 10:
 				#ground_truth_flow.append(filename+"/training/flow_viz/%s/frame_000%d.png" % (sub,i))
@@ -61,11 +63,10 @@ def get_data(filename,data_name):
 				ground_truth_flow.append(read_flo(filename+"/training/flow/%s/frame_00%d.flo" % (sub,i)))
 
 	# create the dataset
-	print("Observations read %d. Each obsevation contains a pair of frames and the ground truth flow" % len(filenames1))
+	print("Observations read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
 	# create the dataset, every instance is a tensor obj after this
 	dataset =tf.data.Dataset.from_tensor_slices((filenames1,filenames2,ground_truth_flow))
-	# do transformation for each element (decoding the image)
-	dataset  = dataset.map(_parse_function)
+
 	return dataset
 
 # def main():
@@ -76,15 +77,15 @@ def get_data(filename,data_name):
 # 	# read the data
 # 	input = get_data(filename,data)
 
-# 	# #iterators over the dataset
-# 	# iterator = input.make_one_shot_iterator()
-# 	# one_element = iterator.get_next()
-# 	# with tf.Session() as sess:
-# 	# 	for i in range(5):
-# 	# 		print("hi")
-# 	# 		print(type(one_element[0]))
-# 	# 		print(type(one_element[1]))
-# 	# 		print(type(one_element[2]))
+# 	#iterators over the dataset
+# 	iterator = input.make_one_shot_iterator()
+# 	one_element = iterator.get_next()
+# 	with tf.Session() as sess:
+# 		for i in range(5):
+# 			print(type(one_element[0]))
+# 			print(one_element[0].eval().shape)
+# 	#path = "/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/albedo/alley_1/frame_0001.png"
+# 	#_parse_function(path)
 
 
 # if __name__ == '__main__':
