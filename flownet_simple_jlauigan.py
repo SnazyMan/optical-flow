@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+from data_read import *
 import glob
 import os
 import sys
@@ -11,22 +12,6 @@ import sys
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-
-
-def load_image(addr):
-    # read an image and resize to (256, 256)
-    # cv2 load images as BGR, convert it to RGB
-    img = cv2.imread(addr)
-    img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_CUBIC)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = img.astype(np.float32)
-    return img
-
-def _int64_feature(value):
-    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-
-def _bytes_feature(value):
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
@@ -63,7 +48,7 @@ def cnn_model_fn(features, labels, mode):
   # Second max pooling layer with a 2x2 filter and stride of 2
   pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
-  
+
   # Convolutional Layer #3
   # Computes 256 features using a 5x5 filter.
   # Padding is added to preserve width and height.
@@ -293,9 +278,14 @@ def cnn_model_fn(features, labels, mode):
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=flow_prediction)
 
-  """Need to finish this section"""
+  """loss is euclidean distance, output is same shape as labels - pixel based loss"""
   # Calculate Loss (for both TRAIN and EVAL modes)
-  loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+  loss = tf.losses.absolute_difference(
+      labels=labels,
+      predictions=flow_prediction,
+      weights=1.0,
+      reduction='NONE'
+  )
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
@@ -305,34 +295,27 @@ def cnn_model_fn(features, labels, mode):
         global_step=tf.train.get_global_step())
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-  # Add evaluation metrics (for EVAL mode)
-  eval_metric_ops = {
-      "accuracy": tf.metrics.accuracy(
-          labels=labels, predictions=predictions["classes"])}
-  return tf.estimator.EstimatorSpec(
-      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
 
-def main(unused_argv):
 
-"""Import .flo file for labels - pass name of .flo file as argument"""
-# WARNING: this will work on little-endian architectures (eg Intel x86) only!
+def main():
+ 	# seting the path and dataset
+ 	filename = ("/sintel")
+ 	data = "albedo"
 
-        with open("/other-gt-flow/Grove2/flow10.flo", 'rb') as f:
-            magic = np.fromfile(f, np.float32, count=1)
-            if 202021.25 != magic:
-                print 'Magic number incorrect. Invalid .flo file'
-            else:
-                w = np.fromfile(f, np.int32, count=1)[0]
-                h = np.fromfile(f, np.int32, count=1)[0]
-                print 'Reading %d x %d flo file' % (w, h)
-                data = np.fromfile(f, np.float32, count=2*w*h)
-                # Reshape data into 3D array (columns, rows, bands)
-                train_labels = np.resize(data, (h, w, 2))
+ 	# read the data
+ 	input = get_data(filename,data)
 
+        #iterators over the dataset
+ 	iterator = input.make_one_shot_iterator()
+ 	one_element = iterator.get_next()
+ 	with tf.Session() as sess:
+            for i in range(5):
+                print("hi")
+                print(type(one_element[0]))
+                print(type(one_element[1]))
+                print(type(one_element[2]))
 
-"""Initialize training data and labels, save into tfrecord"""
-train_data_path = "/other-data/Grove2/*.png"
-
-addrs = glob.glob(train_data_path)
+if __name__ == '__main__':
+    main()
