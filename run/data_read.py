@@ -25,8 +25,9 @@ def read_flo(filename):
 
 def parse_function(filename):
   image_string = tf.read_file(filename)
-  image_decoded = tf.image.decode_png(image_string)
-  return image_decoded
+  image_decoded = tf.image.decode_png(image_string,channels=3)
+  image_resized = tf.image.resize_images(image_decoded, [436, 1024])  
+  return image_resized
 
 def get_data(filename,data_name):
 	''' filename: the path of MPI-Sintel-complete
@@ -65,33 +66,35 @@ def get_data(filename,data_name):
 			else:
 				ground_truth_flow.append(read_flo(filename+"/training/flow/%s/frame_00%d.flo" % (sub,i)))
 
-	# create the dataset
+	# 
 	print("Observations read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
 
-        # create list of stacked,decoded images
+        # create list of stacked,decoded images; concat on dimension 2 (0,1 are w,h) 2 is rgb
 	image_stack = []
 	for image1,image2 in zip(filenames1,filenames2):
 		image_stack.append(tf.concat([image1,image2], 2))
-	# 
+                
+	# convert to dataset object 
 	dataset = tf.data.Dataset.from_tensor_slices((image_stack,ground_truth_flow))
 
+        # I believe the estimator object train method can be passed a dataset directly
 	return dataset
 
-def main():
- 	# seting the path and dataset
- 	filename = ("/home/snazyman/machine_learning/optical-flow/data/sintel")
- 	data = "albedo"
+#def main():
+# 	# seting the path and dataset
+# 	filename = ("/home/snazyman/machine_learning/optical-flow/data/sintel")
+# 	data = "albedo"
 
  	# read the data
- 	input = get_data(filename,data)
+# 	input = get_data(filename,data)
 
  	#iterators over the dataset
- 	iterator = input.make_one_shot_iterator()
- 	one_element = iterator.get_next()
- 	with tf.Session() as sess:
- 		for i in range(5):
- 			print(type(one_element[0]))
- 			print(one_element[0].eval().shape)
+# 	iterator = input.make_one_shot_iterator()
+# 	one_element = iterator.get_next()
+# 	with tf.Session() as sess:
+# 		for i in range(5):
+# 			print(type(one_element[0]))
+# 			print(one_element[0].eval().shape)
  	#path = "/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/albedo/alley_1/frame_0001.png"
  	#_parse_function(path)
 

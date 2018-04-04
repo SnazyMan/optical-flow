@@ -4,14 +4,11 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-from data_read import *
 import glob
 import os
 import sys
 
 tf.logging.set_verbosity(tf.logging.INFO)
-
-
 
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
@@ -19,11 +16,13 @@ def cnn_model_fn(features, labels, mode):
   """Add code for stacking two input frames together to get 6-channel input layer.
   Assuming this will be named input_layer and fed into Conv layer #1"""
 
+  #input_layer = tf.reshape(features["x"], [-1, 436, 1024, 6])
+  
   # Convolutional Layer #1
   # Computes 64 features using a 5x5 filter with ReLU activation.
   # Padding is added to preserve width and height.
   conv1 = tf.layers.conv2d(
-      inputs=input_layer,
+      inputs=features,
       filters=64,
       kernel_size=[7, 7],
       padding="same",
