@@ -21,9 +21,9 @@ def read_flo(filename):
 
 def parse_function(filename):
   image_string = tf.read_file(filename)
-  image_decoded = tf.image.decode_png(image_string)
-  #image_resized2 = tf.image.resize_images(image_decoded2, [28, 28])
-  return image_decoded
+  image_decoded = tf.image.decode_png(image_string,channels = 3)
+  image_resized = tf.image.resize_images(image_decoded, [436, 1024])
+  return image_resized
 
 def get_data(filename,data_name):
 	''' filename: the path of MPI-Sintel-complete
