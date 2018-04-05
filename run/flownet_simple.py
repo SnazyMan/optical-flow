@@ -166,6 +166,32 @@ def cnn_model_fn(features, labels, mode):
       activation=tf.nn.relu
   )
 
+ """Begin Refinement Layer
+  For the tf.layers.conv2d_transpose - still not too sure on whether filter numbers are for output or input
+  but will be easy to check when running"""
+
+  #Deconvolution Layer 1 - upsample by 2
+  deconv5 = tf.layers.conv2d_transpose(
+      inputs=conv6,
+      filters=512,
+      kernel_size=[2,2],
+      strides=2,
+      padding='valid',
+      activation=tf.nn.relu
+  )
+
+  #Stack Deconvolved layer with pool5 layer (which is downsampled conv5_1 layer
+  deconv5_1 = tf.concat([deconv5,conv5_1],0)
+
+  #Calculate intermediate flow frame
+  flow5 = tf.layers.conv2d(
+      inputs=deconv5_1,
+      filters=1,
+      kernel_size=[5,5],
+      padding='valid',
+      activation=tf.nn.relu
+  )
+
   #Begin process of reshaping frame to correct size through deconvolution w/ no activation function
   #This is needed due to arbitrary input shape of input frames - but effectively just upsampling
   flow5_deconv = tf.layers.conv2d_transpose(
@@ -179,21 +205,23 @@ def cnn_model_fn(features, labels, mode):
   flow5_deconv2 = tf.layers.conv2d_transpose(
       inputs=flow5_deconv,
       filters=1,
-      kernel_size=[5,5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation='None'
   )
 
- #Deconvolutional layer #2
+ #Deconvolutional layer #2 - upsample by two
   deconv4 = tf.layers.conv2d_transpose(
       inputs=deconv5_1,
       filters=256,
-      kernel_size=[5,5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation=tf.nn.relu
   )
 
-  deconv4_1 = tf.concat([deconv4,pool4,flow6_deconv2],0)
+  deconv4_1 = tf.concat([deconv4,conv4_1,flow5_deconv2],0)
 
   flow4 = tf.layers.conv2d(
       inputs=deconv4_1,
@@ -214,7 +242,8 @@ def cnn_model_fn(features, labels, mode):
   flow4_deconv2 = tf.layers.conv2d_transpose(
       inputs=flow4_deconv,
       filters=1,
-      kernel_size=[5, 5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation='None'
   )
@@ -223,12 +252,13 @@ def cnn_model_fn(features, labels, mode):
   deconv3 = tf.layers.conv2d(
       inputs=deconv4_1,
       filters=128,
-      kernel_size=[5,5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation=tf.nn.relu
   )
 
-  deconv3_1 =  tf.concat([deconv3,pool3,flow4_deconv2],0)
+  deconv3_1 =  tf.concat([deconv3,conv3_1,flow4_deconv2],0)
 
   flow3 = tf.layers.conv2d(
       inputs=deconv3_1,
@@ -249,7 +279,8 @@ def cnn_model_fn(features, labels, mode):
   flow3_deconv2 = tf.layers.conv2d_transpose(
       inputs=flow3_deconv,
       filters=1,
-      kernel_size=[5, 5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation='None'
   )
@@ -258,12 +289,13 @@ def cnn_model_fn(features, labels, mode):
   deconv2 = tf.layers.conv2d(
       inputs=deconv3_1,
       filters=64,
-      kernel_size=[5,5],
+      kernel_size=[2,2],
+      strides=2,
       padding='valid',
       activation=tf.nn.relu
   )
 
-  deconv2_1 =  tf.concat([deconv2,pool2,flow3_deconv2],0)
+  deconv2_1 =  tf.concat([deconv2,conv2,flow3_deconv2],0)
 
   flow_prediction = tf.layers.conv2d(
       inputs=deconv2_1,
