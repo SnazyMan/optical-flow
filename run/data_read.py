@@ -19,14 +19,14 @@ def read_flo(filename):
 			# print('Reading %d x %d flo file' % (h, w))
 			data = np.fromfile(f, np.float32, count=2*w*h)
 			# Reshape data into 3D array (columns, rows, bands
-			train_labels = np.resize(data, (h, w, 2))
+			train_labels = np.resize(data, (512, w, 2))
 			train_labels = tf.convert_to_tensor(train_labels)
 	return train_labels
 
 def parse_function(filename):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string,channels=3)
-  image_resized = tf.image.resize_images(image_decoded, [436, 1024])  
+  image_resized = tf.image.resize_images(image_decoded, [512, 1024])  
   return image_resized
 
 def get_data(filename,data_name):
