@@ -141,30 +141,6 @@ def cnn_model_fn(features, labels, mode):
       activation=tf.nn.relu)
 
 
-  """Begin Refinement Layer
-  For the tf.layers.conv2d_transpose - still not too sure on whether filter numbers are for output or input
-  but will be easy to check when running"""
-
-  #Deconvolution Layer 1
-  deconv5 = tf.layers.conv2d_transpose(
-      inputs=conv6,
-      filters=512,
-      kernel_size=[5,5],
-      padding='valid',
-      activation=tf.nn.relu
-  )
-
-  #Stack Deconvolved layer with pool5 layer (which is downsampled conv5_1 layer
-  deconv5_1 = tf.concat([deconv5,pool5],0)
-
-  #Calculate intermediate flow frame
-  flow5 = tf.layers.conv2d(
-      inputs=deconv5_1,
-      filters=1,
-      kernel_size=[5,5],
-      padding='valid',
-      activation=tf.nn.relu
-  )
 
 """Begin Refinement Layer
   For the tf.layers.conv2d_transpose - still not too sure on whether filter numbers are for output or input
