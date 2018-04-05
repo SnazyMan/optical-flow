@@ -4,16 +4,14 @@ from flownet_simple import *
 
 def main():
 	# seting the path and dataset [to run on floydhub, mount at sintel]
-	filename = ("/sintel")
+	filename = ("/home/snazyman/machine_learning/optical-flow/data/sintel")
 	data = "albedo"
 
-	# read the data
-	input = get_data(filename,data)
-	batched = input.batch(10);
-	#iterators over the dataset
-	features,labels = batched.make_one_shot_iterator().get_next()
-	ofModel = tf.estimator.Estimator(cnn_model_fn(features,labels,tf.estimator.ModeKeys.TRAIN))        
-	ofModel.train(input_fn=get_data(filename,data))
+        # create estimator object with flownet_simple network arch
+	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn)
+
+        # train the network
+	ofModel.train(input_fn=lambda:get_data(filename,data))
 
 if __name__ == '__main__':
     main()
