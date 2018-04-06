@@ -39,7 +39,7 @@ def get_data(filename,data_name):
 	subdir.sort()
 
 	# read only 4 sub directories
-	subdir = [subdir[x] for x in range(0,5)]
+	subdir = [subdir[x] for x in range(0,1)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -71,7 +71,7 @@ def get_data(filename,data_name):
 
         # I believe the estimator object train method can be passed a dataset directly
         # TODO: fix batch size to appropriate amount here
-	return dataset.batch(10)
+	return dataset.batch(4)
 
 if __name__ == '__main__':
  	main()
