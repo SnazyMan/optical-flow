@@ -46,7 +46,7 @@ def get_data(filename,data_name):
 	subdir.sort()        
 
 	# read only 4 sub directories
-#	subdir = [subdir[x] for x in range(0,5)]
+	subdir = [subdir[x] for x in range(0,1)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -87,6 +87,53 @@ def get_data(filename,data_name):
         # I believe the estimator object train method can be passed a dataset directly
         # TODO: fix batch size to appropriate amount here
 	return dataset.batch(1)
+
+def get_data_test(filename,data_name):
+	''' filename: the path of MPI-Sintel-complete
+	    data_name: the dataset we use (only clean or final)'''
+
+	# get the sub directory for this dataset
+	path = filename+"/test/"+data_name
+	subdir = next(os.walk(path))[1]
+	subdir.sort()        
+
+	# read only 4 sub directories
+	subdir = [subdir[x] for x in range(0,1)]
+
+	# get the list of file names
+	# filename1: list of frame1 tensor
+	# filename2: list of frame2 tensor
+	# ground_truth_flow: list of flow tensor
+	filenames1 = []
+	filenames2 = []
+	ground_truth_flow = [];
+	for sub in subdir:
+		number = len(next(os.walk(filename+"/test/"+data_name+"/"+sub))[2])
+		for i in range(1,number):
+			if i < 10:
+				filenames1.append(parse_function(filename+"/test/%s/%s/frame_000%d.png" % (data_name,sub,i)))
+			else:
+				filenames1.append(parse_function(filename+"/test/%s/%s/frame_00%d.png" % (data_name,sub,i)))
+		for i in range(2,number+1):
+			if i < 10:
+				filenames2.append(parse_function(filename+"/test/%s/%s/frame_000%d.png" % (data_name,sub,i)))
+			else:
+				filenames2.append(parse_function(filename+"/test/%s/%s/frame_00%d.png" % (data_name,sub,i)))				
+
+	print("Features read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
+
+        # create list of stacked,decoded images; concat on dimension 2 (0,1 are w,h) 2 is rgb
+	image_stack = []
+	for image1,image2 in zip(filenames1,filenames2):
+		image_stack.append(tf.concat([image1,image2], 2))
+                
+	# convert to dataset object 
+	dataset = tf.data.Dataset.from_tensor_slices(image_stack)
+
+        # I believe the estimator object train method can be passed a dataset directly
+        # TODO: fix batch size to appropriate amount here
+	return dataset
+
 
 if __name__ == '__main__':
  	main()
