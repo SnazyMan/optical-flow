@@ -16,6 +16,10 @@ def main():
 
 	ofModel.train(input_fn=lambda:get_data(filename,data))
 
+	eval = ofModel.evaluate(input_fn=lambda:get_data(filename,data))
+
+	print(eval)
+
 if __name__ == '__main__':
 	main()
 
