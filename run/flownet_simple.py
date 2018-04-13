@@ -294,8 +294,8 @@ def cnn_model_fn(features,labels,mode):
   loss = tf.losses.absolute_difference(
       labels=labels,
       predictions=flow_prediction,
-      weights=1.0,
-      reduction=tf.losses.Reduction.NONE
+      weights=tf.ones([1, 512, 1024, 2], tf.int32),
+      reduction=tf.losses.Reduction.MEAN
   )
 
   # Configure the Training Op (for TRAIN mode)

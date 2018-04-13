@@ -2,31 +2,38 @@ import tensorflow as tf
 import numpy as np
 import os
 
-import tensorflow as tf
-import numpy as np
-import os
-
 def read_flo(filename):
 	"""Import .flo file for labels - pass name of .flo file as argument"""
 	# WARNING: this will work on little-endian architectures (eg Intel x86) only!
-	with open(filename, 'rb') as f:
-		magic = np.fromfile(f, np.float32, count=1)
-		if 202021.25 != magic:
-			print('Magic number incorrect. Invalid .flo file')
-		else:
-			w = np.fromfile(f, np.int32, count=1)[0]
-			h = np.fromfile(f, np.int32, count=1)[0]
-			# print('Reading %d x %d flo file' % (h, w))
-			data = np.fromfile(f, np.float32, count=2*w*h)
-			# Reshape data into 3D array (columns, rows, bands
-			train_labels = np.resize(data, (512, w, 2))
-			train_labels = tf.convert_to_tensor(train_labels)
-	return train_labels
+	#with open(filename, 'rb') as f:
+	#	magic = np.fromfile(f, np.float32, count=1)
+	#	if 202021.25 != magic:
+	#		print('Magic number incorrect. Invalid .flo file')
+	#	else:
+	#		w = np.fromfile(f, np.int32, count=1)[0]
+	#		h = np.fromfile(f, np.int32, count=1)[0]
+	#		# print('Readofing %d x %d flo file' % (h, w))
+	#		data = np.fromfile(f, np.float32, count=2*w*h)
+	#		# Reshape data into 3D array (columns, rows, bands
+	#		train_labels = np.resize(data, (512, w, 2))
+	#		train_labels = tf.convert_to_tensor(train_labels)
+	train_labels = tf.read_file(filename)
+	train_labels = tf.decode_raw(train_labels,tf.float32,True)
+	# slice the first 3 bytes off of label. Byte 0 is magic number. Byte 1 is height. Byte 2 is width
+	# slice semantics [start:stop:step] where we are zero based index 0,1,2,3,4 ...
+	# remove 3 leading bytes [3:] - keep 3 to end       
+	train_labels_s = train_labels[3:]
+	# reshape to 512x1024x2
+	train_labels_s_r = tf.reshape(train_labels_s,[436,1024,2])
+	# Bilinear interpolate image to new size        
+	train_labels_s_r_r = tf.image.resize_images(train_labels_s_r, [512,1024])
+	#train_labels_s_r_r_s = tf.squeeze(train_labels_s_r_r,axis=0)        
+	return train_labels_s_r_r
 
 def parse_function(filename):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string,channels=3)
-  image_resized = tf.image.resize_images(image_decoded, [512, 1024])  
+  image_resized = tf.image.resize_images(image_decoded, [512, 1024])
   return image_resized
 
 def get_data(filename,data_name):
@@ -36,9 +43,10 @@ def get_data(filename,data_name):
 	# get the sub directory for this dataset
 	path = filename+"/training/"+data_name
 	subdir = next(os.walk(path))[1]
+	subdir.sort()        
 
 	# read only 4 sub directories
-	subdir = [subdir[x] for x in range(0,5)]
+#	subdir = [subdir[x] for x in range(0,5)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -78,7 +86,7 @@ def get_data(filename,data_name):
 
         # I believe the estimator object train method can be passed a dataset directly
         # TODO: fix batch size to appropriate amount here
-	return dataset.batch(10)
+	return dataset.batch(1)
 
 if __name__ == '__main__':
  	main()
