@@ -7,7 +7,7 @@ import tensorflow as tf
 import glob
 import os
 import sys
-import vgg16
+from vgg16 import *
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -299,7 +299,7 @@ def cnn_model_fn(features,labels,mode):
   - assuming reconstruction of frame will be done and variable "reconstructed_frame"
   """
 
-  #need to batch the images togther before building network
+  #need to batch the images togther before building network. 224x224 images
   style_weight = 0.5
   content_weight = 0.5
   loss_network_style = Vgg16()
