@@ -323,6 +323,7 @@ def cnn_model_fn(features,labels,mode):
   style_loss = tf.losses.mean_squared_error(style_gram_mat1,style_gram_mat2)
   
   loss = content_weight*content_loss + style_weight*style_loss
+  tf.losses.add_loss(loss)
   
   """
   loss = tf.losses.absolute_difference(
