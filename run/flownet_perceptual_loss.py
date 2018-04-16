@@ -7,6 +7,7 @@ import tensorflow as tf
 import glob
 import os
 import sys
+import vgg16
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
