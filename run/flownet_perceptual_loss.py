@@ -299,10 +299,12 @@ def cnn_model_fn(features,labels,mode):
   - assuming reconstruction of frame will be done and variable "reconstructed_frame"
   """
 
-  
+  #need to batch the images togther before building network
   style_weight = 0.5
   content_weight = 0.5
-  loss_network = vgg.Vgg16()
+  loss_network_style = Vgg16()
+  loss_network_content = Vgg16()
+  loss_network_input = Vgg16()
   loss_network_style.build(features)
   loss_network_content.build(reconstructed_labels)
   loss_network_input.build(reconstructed_image)
