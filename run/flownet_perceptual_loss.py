@@ -7,6 +7,7 @@ import tensorflow as tf
 import glob
 import os
 import sys
+from vgg16 import *
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -298,10 +299,12 @@ def cnn_model_fn(features,labels,mode):
   - assuming reconstruction of frame will be done and variable "reconstructed_frame"
   """
 
-  
+  #need to batch the images togther before building network. 224x224 images
   style_weight = 0.5
-  content_weight = 0.5
-  loss_network = vgg.Vgg16()
+  content_weight = 1 - style_weight
+  loss_network_style = Vgg16()
+  loss_network_content = Vgg16()
+  loss_network_input = Vgg16()
   loss_network_style.build(features)
   loss_network_content.build(reconstructed_labels)
   loss_network_input.build(reconstructed_image)
@@ -323,6 +326,7 @@ def cnn_model_fn(features,labels,mode):
   style_loss = tf.losses.mean_squared_error(style_gram_mat1,style_gram_mat2)
   
   loss = content_weight*content_loss + style_weight*style_loss
+  tf.losses.add_loss(loss)
   
   """
   loss = tf.losses.absolute_difference(
