@@ -301,7 +301,7 @@ def cnn_model_fn(features,labels,mode):
 
   #need to batch the images togther before building network. 224x224 images
   style_weight = 0.5
-  content_weight = 0.5
+  content_weight = 1 - style_weight
   loss_network_style = Vgg16()
   loss_network_content = Vgg16()
   loss_network_input = Vgg16()
