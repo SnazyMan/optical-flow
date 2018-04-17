@@ -36,17 +36,21 @@ def parse_function(filename):
   image_resized = tf.image.resize_images(image_decoded, [512, 1024])
   return image_resized
 
-def get_data(filename,data_name):
+def get_data(filename,data_name,interpath):
 	''' filename: the path of MPI-Sintel-complete
 	    data_name: the dataset we use (albedo, clean or ...)'''
 
 	# get the sub directory for this dataset
 	path = filename+"/training/"+data_name
 	subdir = next(os.walk(path))[1]
-	subdir.sort()        
+	subdir.sort()
 
+	# get the sub directory for the intermediate frame
+	subdir_inter = next(os.walk(interpath))[1]
+	subdir_inter.sort()
+        
 	# read only 4 sub directories
-	subdir = [subdir[x] for x in range(0,1)]
+	#subdir = [subdir[x] for x in range(0,1)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -59,7 +63,7 @@ def get_data(filename,data_name):
 		number = len(next(os.walk(filename+"/training/"+data_name+"/"+sub))[2])
 		for i in range(1,number):
 			if i < 10:
-				filenames1.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
+				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
 			else:
 				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
 		for i in range(2,number+1):
@@ -76,10 +80,22 @@ def get_data(filename,data_name):
 
 	print("Observations read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
 
-        # create list of stacked,decoded images; concat on dimension 2 (0,1 are w,h) 2 is rgb
+	# get the list of inter frames
+	inter_frames = []        
+	for sub_inter in subdir_inter:
+		number = len(next(os.walk(interpath+"/"+sub_inter))[2])
+		for i in range(1,number+1):                        
+			if i < 10:
+				inter_frames.append(parse_function(interpath+"/%s/frame_000%d.png" % (sub_inter,i)))
+			else:
+				inter_frames.append(parse_function(interpath+"/%s/frame_000%d.png" % (sub_inter,i)))
+
+	print("Inter Observations read %d. Each is reconstructed." % len(inter_frames))
+
+        # create list of stacked,decoded images and reconstructed intermediate frame; concat on dimension 2 (0,1 are w,h) 2 is rgb
 	image_stack = []
-	for image1,image2 in zip(filenames1,filenames2):
-		image_stack.append(tf.concat([image1,image2], 2))
+	for image1,image2,image3 in zip(filenames1,filenames2,inter_frames):
+		image_stack.append(tf.concat([image1,image2,image3], 2))
                 
 	# convert to dataset object 
 	dataset = tf.data.Dataset.from_tensor_slices((image_stack,ground_truth_flow))

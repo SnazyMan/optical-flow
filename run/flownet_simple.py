@@ -285,7 +285,6 @@ def cnn_model_fn(features,labels,mode):
       activation=tf.nn.relu
   )
 
-
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=flow_prediction)
 
@@ -313,7 +312,7 @@ def cnn_model_fn(features,labels,mode):
   
   # Add evaluation metrics (for EVAL mode)
   eval_metric_ops = {
-      "accuracy": tf.metrics.accuracy(
+      "accuracy": tf.metrics.mean_squared_error(
           labels=labels, predictions=flow_prediction)}
   return tf.estimator.EstimatorSpec(
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)

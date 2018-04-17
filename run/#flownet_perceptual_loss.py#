@@ -278,7 +278,6 @@ def cnn_model_fn(features,labels,mode):
     activation=None
   )
     
-
   flow_prediction = tf.layers.conv2d(
       inputs=predict_resize,
       filters=2,
@@ -286,7 +285,6 @@ def cnn_model_fn(features,labels,mode):
       padding='same',
       activation=tf.nn.relu
   )
-
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=flow_prediction)

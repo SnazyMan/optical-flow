@@ -52,36 +52,36 @@ def recon_single_channel(split,flow):
 	# the computations over the whole image are expensive
 	# i set the range to be (0,20) for testing
 	#######################################################
-	for i in range(0,20):
-		for j in range(0,20):
+	for i in range(0,512):
+		for j in range(0,1024):
 			temp_x = i+tf.div(flow[i,j,0],2)
 			temp_y = j+tf.div(flow[i,j,1],2)
 			temp_x = tf.cast(temp_x,tf.int64)
 			temp_y = tf.cast(temp_y,tf.int64)
-			inter_split=set_value(inter_split,temp_x,temp_y,split[i,j,0])
+			inter_split=set_value(inter_split,temp_x,temp_y,split[i,j,1])
 	return inter_split
 
 def reconstuction(frame,flow):
-	split0, split1, split2 = tf.split(frame,3,2)
+	split0, split1, split2 = tf.split(frame,3,3)
 	inter_split0 = recon_single_channel(split0,flow)
 	inter_split1 = recon_single_channel(split1,flow)
 	inter_split2 = recon_single_channel(split2,flow)
-	inter_frame = tf.concat([inter_split0,inter_split1,inter_split2], 2)
+	inter_frame = tf.concat([inter_split0,inter_split1,inter_split2], 3)
 	return inter_frame
 
-def main():
-	# read in the file
-	frame_path = ('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/final/alley_1/frame_0001.png')
-	flow_path = ('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/flow/alley_1/frame_0001.flo')
-	# if the reconstuction is put in out layers, the frame should be the first one in the pair
-	# the flow should be the current prediction
-	frame = parse_function(frame_path)
-	flow = read_flo(flow_path)
-	inter_frame = reconstuction(frame,flow)
-
-	# test with a session
-	sess = tf.Session()
-	print(sess.run(tf.shape(inter_frame)))
+#def main():
+#	# read in the file
+#	frame_path = ('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/final/alley_1/frame_0001.png')
+#	flow_path = ('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/flow/alley_1/frame_0001.flo')
+#	# if the reconstuction is put in out layers, the frame should be the first one in the pair
+#	# the flow should be the current prediction
+#	frame = parse_function(frame_path)
+#	flow = read_flo(flow_path)
+#	inter_frame = reconstuction(frame,flow)
+#
+#	# test with a session
+#	sess = tf.Session()
+#	print(sess.run(tf.shape(inter_frame)))
 	
 
 
