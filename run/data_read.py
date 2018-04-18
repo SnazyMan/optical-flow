@@ -50,7 +50,8 @@ def get_data(filename,data_name,interpath):
 	subdir_inter.sort()
         
 	# read only 4 sub directories
-	#subdir = [subdir[x] for x in range(0,1)]
+	subdir = [subdir[x] for x in range(0,1)]
+	subdir_inter = [subdir_inter[x] for x in range(0,1)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -113,9 +114,9 @@ def get_data_test(filename,data_name):
 	subdir = next(os.walk(path))[1]
 	subdir.sort()        
 
-	# read only 4 sub directories
+	# read only 1 sub directories
 	subdir = [subdir[x] for x in range(0,1)]
-
+        
 	# get the list of file names
 	# filename1: list of frame1 tensor
 	# filename2: list of frame2 tensor

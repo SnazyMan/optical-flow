@@ -19,8 +19,8 @@ def cnn_model_fn(features,labels,mode):
   Assuming this will be named input_layer and fed into Conv layer #1"""
 
   # split the stacked input frame and the reconstructed frame
-  frame1,frame2,reconstructed_labels = tf.split(features,3,3)
-  imageStack = tf.concat([frame1,frame2],2)
+  frame1,frame2,frame3 = tf.split(features,3,3)
+  imageStack = tf.concat([frame1,frame2],3)
   
   # Convolutional Layer #1
   # Computes 64 features using a 5x5 filter with ReLU activation.
@@ -278,16 +278,16 @@ def cnn_model_fn(features,labels,mode):
     activation=None
   )
     
-
   flow_prediction = tf.layers.conv2d(
       inputs=predict_resize,
-      filters=2,
+      filters=3,
       kernel_size=[5,5],
       padding='same',
       activation=tf.nn.relu
   )
 
-
+#  flow_prediction = tf.concat([flow_prediction_a, tf.zeros([1,512,1024,1],tf.float32)],3)
+  
   if mode == tf.estimator.ModeKeys.PREDICT:
     return tf.estimator.EstimatorSpec(mode=mode, predictions=flow_prediction)
 
@@ -300,8 +300,10 @@ def cnn_model_fn(features,labels,mode):
   - assuming reconstruction of frame will be done and variable "reconstructed_frame"
   """
   # reconstruct the predicted flow
-  reconstructed = reconstuction(frame1,flow_prediction,1)
-  reconstructed_images = tf.image.resize_images(reconstructed, [224,224])
+  #reconstructed = reconstuction(frame1,flow_prediction,1)
+  reconstructed_images = tf.image.resize_images(flow_prediction, [224,224])  
+  styleFrame = tf.image.resize_images(frame2, [224,224])
+  reconstructed_labels = tf.image.resize_images(frame3, [224,224])
   
   #need to batch the images togther before building network. 224x224 images
   style_weight = 0.5
@@ -309,9 +311,9 @@ def cnn_model_fn(features,labels,mode):
   loss_network_style = Vgg16("/vgg/vgg16.npy")
   loss_network_content = Vgg16("/vgg/vgg16.npy")
   loss_network_input = Vgg16("/vgg/vgg16.npy")
-  loss_network_style.build(frame2)
+  loss_network_style.build(reconstructed_images)
   loss_network_content.build(reconstructed_labels)
-  loss_network_input.build(reconstructed_image)
+  loss_network_input.build(styleFrame)
   
   content_loss = tf.losses.mean_squared_error(loss_network_content.conv3_1, loss_network_input.conv3_1)
   
@@ -332,14 +334,15 @@ def cnn_model_fn(features,labels,mode):
   loss = content_weight*content_loss + style_weight*style_loss
   tf.losses.add_loss(loss)
   
-  """
-  loss = tf.losses.absolute_difference(
-      labels=labels,
-      predictions=flow_prediction,
-      weights=tf.ones([1, 512, 1024, 2], tf.int32),
-      reduction=tf.losses.Reduction.MEAN
-  )
-  """
+  #styleFrame = tf.image.resize_images(flow_prediction, [224,224])
+  #reconstructed_labels = tf.image.resize_images(labels, [224,224])
+  
+  #loss = tf.losses.absolute_difference(
+  #    labels=reconstructed_labels,
+  #    predictions=styleFrame,
+  #    weights=tf.ones([1, 224, 224, 2], tf.int32),
+  #    reduction=tf.losses.Reduction.MEAN
+  #)
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:

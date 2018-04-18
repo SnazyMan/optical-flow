@@ -74,13 +74,13 @@ def reconstuction(frames,flows,batch):
 	'''
 	
 	frame_temp  = tf.reshape(frames[0,:,:,:],[512,1024,3])
-	flow_temp  = tf.reshape(flows[0,:,:,:],[512,1024,2])
+	flow_temp  = tf.reshape(flows[0,:,:,:],[512,1024,3])
 	inter_frames = recon_single_frame(frame_temp,flow_temp)
 	# frame will be of size [batch,512,1024,3]
 	for i in range(1,batch):
 		# each frame_temp will be of size [512,1024,3]
 		frame_temp  = tf.reshape(frames[i,:,:,:],[512,1024,3])
-		flow_temp  = tf.reshape(flows[i,:,:,:],[512,1024,2])
+		flow_temp  = tf.reshape(flows[i,:,:,:],[512,1024,3])
 		inter_frames = tf.concat([inter_frames,recon_single_frame(frame_temp,flow_temp)], 0)
 	return inter_frames
 
