@@ -292,15 +292,22 @@ def cnn_model_fn(features,labels,mode):
 
   # Calculate Loss (for both TRAIN and EVAL modes)
   #using cosine distance as a measure of directionality between predicited optical flow vectors and labels
-  constants = tf.ones([tf.shape(flow_prediction)[1],tf.shape(flow_prediction)[2],tf.shape(flow_prediction)[3]])
-  temp_tanh_pred = tf.tanh(flow_prediction)
-  pred_scaled = tf.div(tf.add(temp_tanh_pred,constants),2)
-  temp_tanh_labels = tf.tanh(labels)
-  labels_scaled = tf.div(tf.add(temp_tanh_labels, constants), 2)
+  #constants = tf.ones([tf.shape(flow_prediction)[1],tf.shape(flow_prediction)[2],tf.shape(flow_prediction)[3]])
+  #temp_tanh_pred = tf.tanh(flow_prediction)
+  #pred_scaled = tf.div(tf.add(temp_tanh_pred,constants),2)
+  #temp_tanh_labels = tf.tanh(labels)
+  #labels_scaled = tf.div(tf.add(temp_tanh_labels, constants), 2)
 
+  label_length = tf.norm(labels,ord='euclidean',axis=3,keepdims=True)
+  label_length = tf.add(.00000001,label_length)  
+  label_scaled = tf.div(labels,label_length)
 
+  flow_length = tf.norm(flow_prediction,ord='euclidean',axis=3,keepdims=True)
+  flow_length = tf.add(.00000001,flow_length)    
+  pred_scaled = tf.div(flow_prediction,flow_length)
+  
   loss = tf.losses.cosine_distance(
-      labels = labels_scaled,
+      labels = label_scaled,
       predictions=pred_scaled,
       reduction=tf.losses.Reduction.MEAN,
       axis=3
@@ -309,7 +316,7 @@ def cnn_model_fn(features,labels,mode):
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
     optimizer = tf.train.AdamOptimizer(
-      learning_rate=0.001,
+      learning_rate=0.0001,
       beta1=0.9,
       beta2=0.999
     )
