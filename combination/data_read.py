@@ -36,7 +36,7 @@ def parse_function(filename):
   image_resized = tf.image.resize_images(image_decoded, [512, 1024])
   return image_resized
 
-def get_data(filename,data_name,interpath):
+def get_data(filename,data_name,interpath,train):
 	''' filename: the path of MPI-Sintel-complete
 	    data_name: the dataset we use (albedo, clean or ...)'''
 
@@ -62,17 +62,23 @@ def get_data(filename,data_name,interpath):
 	ground_truth_flow = [];
 	for sub in subdir:
 		number = len(next(os.walk(filename+"/training/"+data_name+"/"+sub))[2])
-		for i in range(1,number):
+		if train = True:
+			low = 1
+			up = number - 7
+		else:
+			low = number - 6
+			up = number
+		for i in range(low,up):
 			if i < 10:
 				filenames1.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
 			else:
 				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
-		for i in range(2,number+1):
+		for i in range(low+1,up+1):
 			if i < 10:
 				filenames2.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
 			else:
 				filenames2.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))				
-		for i in range(1,number):
+		for i in range(low,up):
 			if i < 10:
 				#ground_truth_flow.append(filename+"/training/flow_viz/%s/frame_000%d.png" % (sub,i))
 				ground_truth_flow.append(read_flo(filename+"/training/flow/%s/frame_000%d.flo" % (sub,i)))
