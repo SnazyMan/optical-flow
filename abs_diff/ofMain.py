@@ -1,6 +1,6 @@
 import tensorflow as tf
 from data_read import *
-from flownet_perceptual_loss import *
+from flownet_simple import *
 
 def main():
 	# seting the path and set [to run on floydhub, mount at sintel]

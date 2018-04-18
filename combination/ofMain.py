@@ -1,6 +1,6 @@
 import tensorflow as tf
 from data_read import *
-from flownet_perceptual_loss import *
+from flownet_cosine_distance_absolute_difference_combined import *
 
 def main():
 	# seting the path and set [to run on floydhub, mount at sintel]
