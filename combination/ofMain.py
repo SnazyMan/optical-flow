@@ -8,8 +8,8 @@ def main():
 	filename = ("/sintel")        
 	#interpath = ("/home/snazyman/machine_learning/optical-flow/data/inter_flow/inter_flow")
 	interpath = ("/inter")               
-	data_train = "final"
-	data_test = "clean"
+	data = "final"
+	#data_test = "clean"
 
 	#dataset = get_data(filename,data_train,interpath)
 	#iterator = dataset.make_one_shot_iterator()
@@ -19,11 +19,14 @@ def main():
 
 	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir='/output')
 
-	ofModel.train(input_fn=lambda:get_data(filename,data_train,interpath,True))
+	ofModel.train(input_fn=lambda:get_data(filename,data,interpath,True))
 
-	eval = ofModel.evaluate(input_fn=lambda:get_data(filename,data_train,interpath,True))
+	eval_train = ofModel.evaluate(input_fn=lambda:get_data(filename,data,interpath,True))
+	eval_test = ofModel.evaluate(input_fn=lambda:get_data(filename,data,interpath,False))
 
-	print(eval)
+
+	print(eval_train)
+	print(eval_test)
 
 	#predictions = ofModel.predict(
 	#	x = None,
