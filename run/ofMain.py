@@ -5,9 +5,9 @@ from flownet_perceptual_loss import *
 def main():
 	# seting the path and set [to run on floydhub, mount at sintel]
 	#filename = ("/home/snazyman/machine_learning/optical-flow/data/sintel")
-	filename = ("/sintel")        
+	filename = ("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete")        
 	#interpath = ("/home/snazyman/machine_learning/optical-flow/data/inter_flow/inter_flow")
-	interpath = ("/inter")               
+	interpath = ("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/inter_flow")               
 	data_train = "final"
 	data_test = "clean"
 
@@ -17,7 +17,7 @@ def main():
 	#with tf.Session() as sess: sess.run(print(type(one_element[1])))
 	#cnn_model_fn(features,labels,None)        
 
-	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir="/output")
+	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn)
 
 	ofModel.train(input_fn=lambda:get_data(filename,data_train,interpath))
 

@@ -320,29 +320,29 @@ def cnn_model_fn(features,labels,mode):
   #now will do style loss by calculating Gram matrix for a given layer depth. Will use layer3
   
   style_vec_input = tf.reshape(loss_network_input.conv3_1,
-                               [-1,tf.shape(loss_network_input.conv3_1)[1]*tf.shape(loss_network_input.conv3_1)[2],512])
+                               [-1,tf.shape(loss_network_input.conv3_1)[1]*tf.shape(loss_network_input.conv3_1)[2],256])
 
   style_vec_ref = tf.reshape(loss_network_style.conv3_1,
                                [-1, tf.shape(loss_network_style.conv3_1)[1] * tf.shape(loss_network_style.conv3_1)[2],
-                                512])
+                                256])
 
   style_gram_mat1 = tf.matmul(style_vec_input,style_vec_input,adjoint_a=True)
   style_gram_mat2 = tf.matmul(style_vec_ref, style_vec_ref, adjoint_a=True)
 
   style_loss = tf.losses.mean_squared_error(style_gram_mat1,style_gram_mat2)
   
-  loss = content_weight*content_loss + style_weight*style_loss
-  tf.losses.add_loss(loss)
+  #loss = content_weight*content_loss + style_weight*style_loss
+  #tf.losses.add_loss(loss)
   
   #styleFrame = tf.image.resize_images(flow_prediction, [224,224])
   #reconstructed_labels = tf.image.resize_images(labels, [224,224])
   
-  #loss = tf.losses.absolute_difference(
-  #    labels=reconstructed_labels,
-  #    predictions=styleFrame,
-  #    weights=tf.ones([1, 224, 224, 2], tf.int32),
-  #    reduction=tf.losses.Reduction.MEAN
-  #)
+  loss = tf.losses.absolute_difference(
+     labels=frame3,
+     predictions=flow_prediction,
+     weights=tf.ones([1, 512, 1024, 3], tf.int32),
+     reduction=tf.losses.Reduction.MEAN
+  )
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
