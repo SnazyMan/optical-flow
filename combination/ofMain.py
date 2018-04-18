@@ -19,9 +19,9 @@ def main():
 
 	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir='/output')
 
-	ofModel.train(input_fn=lambda:get_data(filename,data_train,interpath))
+	ofModel.train(input_fn=lambda:get_data(filename,data_train,interpath,True))
 
-	eval = ofModel.evaluate(input_fn=lambda:get_data(filename,data_train,interpath))
+	eval = ofModel.evaluate(input_fn=lambda:get_data(filename,data_train,interpath,True))
 
 	print(eval)
 

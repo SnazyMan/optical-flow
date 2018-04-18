@@ -62,7 +62,7 @@ def get_data(filename,data_name,interpath,train):
 	ground_truth_flow = [];
 	for sub in subdir:
 		number = len(next(os.walk(filename+"/training/"+data_name+"/"+sub))[2])
-		if train = True:
+		if train == True:
 			low = 1
 			up = number - 7
 		else:
