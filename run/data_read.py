@@ -64,7 +64,7 @@ def get_data(filename,data_name,interpath):
 		number = len(next(os.walk(filename+"/training/"+data_name+"/"+sub))[2])
 		for i in range(1,number):
 			if i < 10:
-				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
+				filenames1.append(parse_function(filename+"/training/%s/%s/frame_000%d.png" % (data_name,sub,i)))
 			else:
 				filenames1.append(parse_function(filename+"/training/%s/%s/frame_00%d.png" % (data_name,sub,i)))
 		for i in range(2,number+1):
@@ -87,9 +87,9 @@ def get_data(filename,data_name,interpath):
 		number = len(next(os.walk(interpath+"/"+sub_inter))[2])
 		for i in range(1,number+1):                        
 			if i < 10:
-				inter_frames.append(parse_function(interpath+"/%s/frame_000%d.png" % (sub_inter,i)))
+				inter_frames.append(parse_function(interpath+"/%s/inter_frame_000%d.png" % (sub_inter,i)))
 			else:
-				inter_frames.append(parse_function(interpath+"/%s/frame_000%d.png" % (sub_inter,i)))
+				inter_frames.append(parse_function(interpath+"/%s/inter_frame_00%d.png" % (sub_inter,i)))
 
 	print("Inter Observations read %d. Each is reconstructed." % len(inter_frames))
 
@@ -127,15 +127,9 @@ def get_data_test(filename,data_name):
 	for sub in subdir:
 		number = len(next(os.walk(filename+"/test/"+data_name+"/"+sub))[2])
 		for i in range(1,number):
-			if i < 10:
-				filenames1.append(parse_function(filename+"/test/%s/%s/frame_000%d.png" % (data_name,sub,i)))
-			else:
-				filenames1.append(parse_function(filename+"/test/%s/%s/frame_00%d.png" % (data_name,sub,i)))
+			filenames1.append(parse_function(filename+"/test/%s/%s/frame_%04d.png" % (data_name,sub,i)))
 		for i in range(2,number+1):
-			if i < 10:
-				filenames2.append(parse_function(filename+"/test/%s/%s/frame_000%d.png" % (data_name,sub,i)))
-			else:
-				filenames2.append(parse_function(filename+"/test/%s/%s/frame_00%d.png" % (data_name,sub,i)))				
+			filenames2.append(parse_function(filename+"/test/%s/%s/frame_%04d.png" % (data_name,sub,i)))
 
 	print("Features read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
 
