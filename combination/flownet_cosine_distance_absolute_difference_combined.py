@@ -315,7 +315,7 @@ def cnn_model_fn(features,labels,mode):
 
   alpha = 0.5
 
-  loss = alpha*loss_c0s + (1-alpha)*loss_abs
+  loss = alpha*loss_cos + (1-alpha)*loss_abs
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
