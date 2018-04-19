@@ -28,17 +28,20 @@ def main():
 	print(eval_train)
 	print(eval_test)
 
-	#predictions = ofModel.predict(
-	#	x = None,
-	#	input_fn=lambda:get_data_test(filename,data_clean),
-	#	batch_size=None,
-	#	outputs=None,
-	#	as_iterable=True,
-	#	iterate_batches = false
-	#	)
+	#sess = tf.Session()
+	#saver = tf.train.import_meta_graph('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/DFG4eQPeJPbVovbKYr5XzX/model.ckpt-880.meta')
+	#saver.restore(sess, tf.train.latest_checkpoint('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/DFG4eQPeJPbVovbKYr5XzX'))
 
-	#for e in predictions:
-	#	print(type(e))
+	predictions = ofModel.predict(
+		input_fn=lambda:get_data(filename,'final',interpath,False),
+		predict_keys=None,
+		hooks=None,
+		checkpoint_path=None,
+		)
+	print(type(predictions))
+	print(type(next(predictions)))
+	print(next(predictions))
+	
 
 if __name__ == '__main__':
 	main()

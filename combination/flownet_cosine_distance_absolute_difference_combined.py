@@ -284,6 +284,7 @@ def cnn_model_fn(features,labels,mode):
       activation=tf.nn.relu
   )
 
+
 #  flow_prediction = tf.concat([flow_prediction_a, tf.zeros([1,512,1024,1],tf.float32)],3)
   
   if mode == tf.estimator.ModeKeys.PREDICT:
@@ -324,12 +325,16 @@ def cnn_model_fn(features,labels,mode):
       beta1=0.9,
       beta2=0.999
     )
-    train_op = optimizer.minimize(
+    optimizer1 = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+    train_op = optimizer1.minimize(
       loss=loss,
       global_step=tf.train.get_global_step()
     )
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-  
+
+  if mode == tf.estimator.ModeKeys.PREDICT:
+    return tf.estimator.EstimatorSpec(mode=mode, predictions = flow_prediction)
+
   # Add evaluation metrics (for EVAL mode)
   eval_metric_ops = {
       "accuracy": tf.metrics.accuracy(
