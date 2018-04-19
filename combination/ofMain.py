@@ -19,29 +19,15 @@ def main():
 
 	ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir='/output')
 
-	ofModel.train(input_fn=lambda:get_data(filename,data,interpath,True))
+	ofModel.train(input_fn=lambda:get_data(filename,data,True))
 
-	eval_train = ofModel.evaluate(input_fn=lambda:get_data(filename,data,interpath,True))
-	eval_test = ofModel.evaluate(input_fn=lambda:get_data(filename,data,interpath,False))
+	eval_train = ofModel.evaluate(input_fn=lambda:get_data(filename,data,True))
+	eval_test = ofModel.evaluate(input_fn=lambda:get_data(filename,data,False))
 
 
 	print(eval_train)
 	print(eval_test)
 
-	#sess = tf.Session()
-	#saver = tf.train.import_meta_graph('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/DFG4eQPeJPbVovbKYr5XzX/model.ckpt-880.meta')
-	#saver.restore(sess, tf.train.latest_checkpoint('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/DFG4eQPeJPbVovbKYr5XzX'))
-
-	predictions = ofModel.predict(
-		input_fn=lambda:get_data(filename,'final',interpath,False),
-		predict_keys=None,
-		hooks=None,
-		checkpoint_path=None,
-		)
-	print(type(predictions))
-	print(type(next(predictions)))
-	print(next(predictions))
-	
 
 if __name__ == '__main__':
 	main()

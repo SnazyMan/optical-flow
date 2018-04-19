@@ -15,16 +15,12 @@ def cnn_model_fn(features,labels,mode):
 
   """Add code for stacking two input frames together to get 6-channel input layer.
   Assuming this will be named input_layer and fed into Conv layer #1"""
-
-  # split the stacked input frame and the reconstructed frame
-  frame1,frame2,frame3 = tf.split(features,3,3)
-  imageStack = tf.concat([frame1,frame2],3)
   
   # Convolutional Layer #1
   # Computes 64 features using a 5x5 filter with ReLU activation.
   # Padding is added to preserve width and height.
   conv1 = tf.layers.conv2d(
-      inputs=imageStack,
+      inputs=features,
       filters=64,
       kernel_size=[7, 7],
       padding="same",
@@ -320,13 +316,16 @@ def cnn_model_fn(features,labels,mode):
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
+    # Adam
     optimizer = tf.train.AdamOptimizer(
-      learning_rate=0.001,
+      learning_rate=0.00001,
       beta1=0.9,
-      beta2=0.999
+      beta2=0.999,
+      epsilon = 1
     )
+    # Gradietn Descent
     optimizer1 = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-    train_op = optimizer1.minimize(
+    train_op = optimizer.minimize(
       loss=loss,
       global_step=tf.train.get_global_step()
     )
@@ -340,4 +339,4 @@ def cnn_model_fn(features,labels,mode):
       "accuracy": tf.metrics.accuracy(
           labels=labels, predictions=flow_prediction)}
   return tf.estimator.EstimatorSpec(
-      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops,predictions=flow_prediction)

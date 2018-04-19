@@ -27,6 +27,7 @@ def read_flo(filename):
 	train_labels_s_r = tf.reshape(train_labels_s,[436,1024,2])
 	# Bilinear interpolate image to new size        
 	train_labels_s_r_r = tf.image.resize_images(train_labels_s_r, [512,1024])
+	train_labels_s_r_r = tf.image.per_image_standardization(train_labels_s_r_r)
 	#train_labels_s_r_r_s = tf.squeeze(train_labels_s_r_r,axis=0)        
 	return train_labels_s_r_r
 
@@ -34,9 +35,10 @@ def parse_function(filename):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string,channels=3)
   image_resized = tf.image.resize_images(image_decoded, [512, 1024])
+  image_resized = tf.image.per_image_standardization(image_resized)
   return image_resized
 
-def get_data(filename,data_name,interpath,train):
+def get_data(filename,data_name,train):
 	''' filename: the path of MPI-Sintel-complete
 	    data_name: the dataset we use (albedo, clean or ...)'''
 
@@ -45,13 +47,10 @@ def get_data(filename,data_name,interpath,train):
 	subdir = next(os.walk(path))[1]
 	subdir.sort()
 
-	# get the sub directory for the intermediate frame
-	subdir_inter = next(os.walk(interpath))[1]
-	subdir_inter.sort()
+	
         
 	# read only 4 sub directories
 	#subdir = [subdir[x] for x in range(0,1)]
-	#subdir_inter = [subdir_inter[x] for x in range(0,1)]
 
 	# get the list of file names
 	# filename1: list of frame1 tensor
@@ -87,22 +86,10 @@ def get_data(filename,data_name,interpath,train):
 
 	print("Observations read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
 
-	# get the list of inter frames
-	inter_frames = []        
-	for sub_inter in subdir_inter:
-		number = len(next(os.walk(interpath+"/"+sub_inter))[2])
-		for i in range(1,number+1):                        
-			if i < 10:
-				inter_frames.append(parse_function(interpath+"/%s/inter_frame_000%d.png" % (sub_inter,i)))
-			else:
-				inter_frames.append(parse_function(interpath+"/%s/inter_frame_00%d.png" % (sub_inter,i)))
-
-	print("Inter Observations read %d. Each is reconstructed." % len(inter_frames))
-
         # create list of stacked,decoded images and reconstructed intermediate frame; concat on dimension 2 (0,1 are w,h) 2 is rgb
 	image_stack = []
-	for image1,image2,image3 in zip(filenames1,filenames2,inter_frames):
-		image_stack.append(tf.concat([image1,image2,image3], 2))
+	for image1,image2 in zip(filenames1,filenames2):
+		image_stack.append(tf.concat([image1,image2], 2))
                 
 	# convert to dataset object 
 	dataset = tf.data.Dataset.from_tensor_slices((image_stack,ground_truth_flow))
@@ -111,46 +98,13 @@ def get_data(filename,data_name,interpath,train):
         # TODO: fix batch size to appropriate amount here
 	return dataset.batch(1)
 
-def get_data_test(filename,data_name):
-	''' filename: the path of MPI-Sintel-complete
-	    data_name: the dataset we use (only clean or final)'''
 
-	# get the sub directory for this dataset
-	path = filename+"/test/"+data_name
-	subdir = next(os.walk(path))[1]
-	subdir.sort()        
 
-	# read only 1 sub directories
-	subdir = [subdir[x] for x in range(0,1)]
-        
-	# get the list of file names
-	# filename1: list of frame1 tensor
-	# filename2: list of frame2 tensor
-	# ground_truth_flow: list of flow tensor
-	filenames1 = []
-	filenames2 = []
-	ground_truth_flow = [];
-	for sub in subdir:
-		number = len(next(os.walk(filename+"/test/"+data_name+"/"+sub))[2])
-		for i in range(1,number):
-			filenames1.append(parse_function(filename+"/test/%s/%s/frame_%04d.png" % (data_name,sub,i)))
-		for i in range(2,number+1):
-			filenames2.append(parse_function(filename+"/test/%s/%s/frame_%04d.png" % (data_name,sub,i)))
-
-	print("Features read %d. Each obsevation contains a pair of frames and the ground truth flow." % len(filenames1))
-
-        # create list of stacked,decoded images; concat on dimension 2 (0,1 are w,h) 2 is rgb
-	image_stack = []
-	for image1,image2 in zip(filenames1,filenames2):
-		image_stack.append(tf.concat([image1,image2], 2))
-                
-	# convert to dataset object 
-	dataset = tf.data.Dataset.from_tensor_slices(image_stack)
-
-        # I believe the estimator object train method can be passed a dataset directly
-        # TODO: fix batch size to appropriate amount here
-	return dataset
-
+def main():
+	dataset = get_data('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete','final',True)
+	label = dataset.make_one_shot_iterator().get_next()[0]
+	sess = tf.Session()
+	print(label.eval(session = sess))
 
 if __name__ == '__main__':
  	main()
