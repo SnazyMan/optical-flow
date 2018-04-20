@@ -310,7 +310,7 @@ def cnn_model_fn(features,labels,mode):
      reduction=tf.losses.Reduction.MEAN
   )
 
-  alpha = 0.5
+  alpha = 0.75
 
   loss = alpha*loss_cos + (1-alpha)*loss_abs
 
@@ -318,7 +318,7 @@ def cnn_model_fn(features,labels,mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
     # Adam
     optimizer = tf.train.AdamOptimizer(
-      learning_rate=0.00001,
+      learning_rate=0.001,
       beta1=0.9,
       beta2=0.999,
       epsilon = 1

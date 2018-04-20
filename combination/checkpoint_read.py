@@ -5,7 +5,7 @@ from data_read import *
 from flownet_cosine_distance_absolute_difference_combined import *
 from flo_write import * 
 data = 'final'
-ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir='/Users/renzhihuang/Desktop/CIS520/project/tensorflow/mean_onefolder')
+ofModel = tf.estimator.Estimator(model_fn=cnn_model_fn,model_dir='/Users/renzhihuang/Desktop/final_cnn/#39 alpha=1/nm7iD3UmaigfdXXn7Q2tiV')
 filename = ("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete")        
 interpath = ("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/data/MPI-Sintel-complete/training/inter_flow")
 #eval_train = ofModel.evaluate(input_fn=lambda:get_data(filename,data,True))
@@ -26,7 +26,7 @@ sess = tf.Session()
 #saver = tf.train.import_meta_graph('/Users/renzhihuang/Desktop/CIS520/project/tensorflow/adam_0.1_alpha0.5/model.ckpt-1.meta')
 #saver.restore(sess, '/Users/renzhihuang/Desktop/CIS520/project/tensorflow/adam_0.1_alpha0.5/model.ckpt-1.meta')
 predictions = ofModel.predict(
-	input_fn=lambda:get_data(filename,'final',True),
+	input_fn=lambda:get_data(filename,'final',False),
 	predict_keys=None,
 	hooks=None,
 	checkpoint_path=None,
@@ -36,6 +36,4 @@ print(type(predictions))
 print(type(test_flow))
 print(test_flow.shape)
 print(test_flow)
-np.savetxt("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/foo1.csv", test_flow[:,:,0], delimiter=",")
-np.savetxt("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/foo2.csv", test_flow[:,:,1], delimiter=",")
-#flo_write("/Users/renzhihuang/Desktop/CIS520/project/tensorflow/test.flo",test_flow)
+flo_write(test_flow,"/Users/renzhihuang/Desktop/final_cnn/#39 alpha=1/alpha1.flo")

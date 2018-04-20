@@ -19,8 +19,6 @@ def flo_write(flo,path):
 		band = flo_np.shape[2]
 	except:
 		print ("no band dimension")
-	if (band != 2):
-		print ("band is not 2")
 	header = struct.pack('4sii',tag.encode('ascii'),width,height)
 	with open(path,'wb') as f:
 		f.write(header)
