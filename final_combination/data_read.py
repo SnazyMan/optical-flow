@@ -127,9 +127,9 @@ def get_data(filename,data_name,train,repeat,batch):
 	return dataset.shuffle(1000).repeat(repeat).batch(batch)
 
 def feed_one(path):
-	label = read_flo(path +'/training/flow/alley_1/frame_0044.flo')
-	image1 = parse_function(path+'/training/final/alley_1/frame_0044.png')
-	image2 = parse_function(path +'/training/final/alley_1/frame_0045.png')
+	label = read_flo(path +'/training/flow/alley_1/frame_0018.flo')
+	image1 = parse_function(path+'/training/final/alley_1/frame_0018.png')
+	image2 = parse_function(path +'/training/final/alley_1/frame_0019.png')
 	stack = tf.concat([image1,image2], 2)
 	dataset = tf.data.Dataset.from_tensor_slices(([stack],[label]))
 	return dataset.repeat(1).batch(1)
